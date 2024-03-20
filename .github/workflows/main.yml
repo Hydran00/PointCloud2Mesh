@@ -3,7 +3,7 @@ name: Humble CI
 on:
   push:
     branches:
-      - main
+      - master
   schedule:
     # Run every Friday at 6:30 am to detect breaking APIs
     - cron: '30 6 * * 5'
