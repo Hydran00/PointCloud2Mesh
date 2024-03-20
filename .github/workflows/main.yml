@@ -4,39 +4,18 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   schedule:
     # Run every Friday at 6:30 am to detect breaking APIs
     - cron: '30 6 * * 5'
-
+    
 jobs:
-  industrial_ci:
-    strategy:
-      fail-fast: false
-      matrix:
-        env:
-          - ROS_DISTRO: humble
-            ROS_REPO: testing
-          - ROS_DISTRO: humble
-            ROS_REPO: main
-    runs-on: ubuntu-latest
+  humble_source:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install ROS2 dependencies
-        uses: ros/tooling@main
+      - uses: ros-tooling/setup-ros@v0.7
         with:
-          ros-distro: ${{ matrix.env.ROS_DISTRO }}
-          tool: colcon
-
-      - name: Install additional dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install ros-humble-open3d-conversions
-
-      - name: Build and test
-        run: |
-          colcon build --packages-select 3d_rec
+          required-ros-distributions: humble
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: 3d_rec
+          target-ros2-distro: humble
