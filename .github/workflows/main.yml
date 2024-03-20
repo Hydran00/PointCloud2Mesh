@@ -4,10 +4,7 @@ on:
   push:
     branches:
       - master
-  schedule:
-    # Run every Friday at 6:30 am to detect breaking APIs
-    - cron: '30 6 * * 5'
-    
+          
 jobs:
   humble_source:
     runs-on: ubuntu-22.04
