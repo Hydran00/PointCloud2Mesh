@@ -1,13 +1,15 @@
-
-name: Humble
+name: Humble CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
   schedule:
     # Run every Friday at 6:30 am to detect breaking APIs
     - cron: '30 6 * * 5'
-
 
 jobs:
   industrial_ci:
@@ -15,10 +17,26 @@ jobs:
       fail-fast: false
       matrix:
         env:
-          - {ROS_DISTRO: humble, ROS_REPO: testing}
-          - {ROS_DISTRO: humble, ROS_REPO: main}
+          - ROS_DISTRO: humble
+            ROS_REPO: testing
+          - ROS_DISTRO: humble
+            ROS_REPO: main
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: 'ros-industrial/industrial_ci@master'
-        env: ${{matrix.env}}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ROS2 dependencies
+        uses: ros/tooling@main
+        with:
+          ros-distro: ${{ matrix.env.ROS_DISTRO }}
+          tool: colcon
+
+      - name: Install additional dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install ros-humble-open3d-conversions
+
+      - name: Build and test
+        run: |
+          colcon build --packages-select 3d_rec
