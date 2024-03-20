@@ -23,6 +23,9 @@ install(TARGETS
   rec
   DESTINATION lib/${PROJECT_NAME}
 )
+install(DIRECTORY
+  param
+  DESTINATION share/${PROJECT_NAME})
 
 
 ament_package()

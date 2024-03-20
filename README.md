@@ -14,3 +14,17 @@ ROS2 Package that compute the 3d mesh starting from a point cloud using `open3d`
   ```
   sudo apt-get install ros-humble-open3d-conversions
   ```
+## Install
+1. Clone this repo in your `src` folder inside your ROS2 workspace
+2. Build
+   ```
+   colcon build --symlink-install
+   ```
+4. Source ROS2
+   ```
+   source install/setup.bash
+   ```
+5. Run the node
+   ```
+   ros2 run 3d_rec rec
+   ```
