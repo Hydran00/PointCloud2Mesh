@@ -43,8 +43,19 @@ class PCDListener : public rclcpp::Node {
       visualizer.AddGeometry(pc2_o3d_ptr);
       pc2_o3d_ptr->EstimateNormals();
 
-      std::vector<double> radii{0.005, 0.01, 0.02, 0.04};
-      std::cout<< "Waiting for the mesh" << std::endl;
+      //       # estimate radius for rolling ball
+      // distances = pcd.compute_nearest_neighbor_distance()
+      // avg_dist = np.mean(distances)
+      // radius = 1.5 * avg_dist
+      auto distances = pc2_o3d_ptr->ComputeNearestNeighborDistance();
+      double avg_dist = 0;
+      for (auto dist : distances) {
+        avg_dist += dist;
+      }
+      avg_dist /= distances.size();
+
+      std::vector<double> radii = {5 * avg_dist};
+      std::cout << "Waiting for the mesh" << std::endl;
       auto rec_mesh =
           open3d::geometry::TriangleMesh::CreateFromPointCloudBallPivoting(
               *pc2_o3d_ptr, radii);
@@ -53,12 +64,16 @@ class PCDListener : public rclcpp::Node {
       received_ = false;
       first = false;
       a = false;
-      open3d::io::WriteTriangleMesh("mesh.ply", *rec_mesh);
-      exit(0);  
+      std::cout << "Mesh created" << std::endl;
+      // open3d::io::WriteTriangleMesh("mesh.ply", *rec_mesh);
+      // exit(0);
     }
-    Eigen::Vector3d front = Eigen::Vector3d(0.014839371860051669, 0.38389557435654953, -0.92325726698047395);
-    Eigen::Vector3d lookat = Eigen::Vector3d(-0.30690958816078184, -1.0919699054014078, 2.653967750598559);
-    Eigen::Vector3d up = Eigen::Vector3d(-0.078439667039420083, -0.92006636317111679, -0.38382952725893771);
+    Eigen::Vector3d front = Eigen::Vector3d(
+        0.014839371860051669, 0.38389557435654953, -0.92325726698047395);
+    Eigen::Vector3d lookat = Eigen::Vector3d(
+        -0.30690958816078184, -1.0919699054014078, 2.653967750598559);
+    Eigen::Vector3d up = Eigen::Vector3d(
+        -0.078439667039420083, -0.92006636317111679, -0.38382952725893771);
     double zoom = 0.42;
     // visualizer.GetViewControl().SetFront(front);
     // visualizer.GetViewControl().SetLookat(lookat);
@@ -67,7 +82,6 @@ class PCDListener : public rclcpp::Node {
 
     visualizer.UpdateRender();
     visualizer.PollEvents();
-    
   }
 
   void listener_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
