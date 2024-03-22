@@ -1,0 +1,19 @@
+name: Humble CI
+
+on:
+  push:
+    branches:
+      - master
+          
+jobs:
+  humble_source:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+      - run: sudo apt-get install -y ros-humble-open3d-conversions 
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          package-name: 3d_rec
+          target-ros2-distro: humble
