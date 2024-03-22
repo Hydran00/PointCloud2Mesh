@@ -10,11 +10,13 @@
 
 using namespace std::chrono_literals;
 
-class PCDListener : public rclcpp::Node {
- public:
+class PCDListener : public rclcpp::Node
+{
+public:
   open3d::visualization::Visualizer visualizer;
 
-  PCDListener() : Node("pcd_subsriber_node") {
+  PCDListener() : Node("pcd_subsriber_node")
+  {
     received_ = false;
 
     pcd_subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
@@ -22,55 +24,70 @@ class PCDListener : public rclcpp::Node {
         std::bind(&PCDListener::listener_callback, this,
                   std::placeholders::_1));
     timer_ = this->create_wall_timer(
-        10ms, std::bind(&PCDListener::timer_callback, this));
+        40ms, std::bind(&PCDListener::timer_callback, this));
 
     // init visualization
     visualizer.CreateVisualizerWindow("Open3D", 1600, 900);
+    std::cout << "Visualizer created" << std::endl;
   }
 
- private:
-  void timer_callback() {
-    if (received_ && first) {
+private:
+  void timer_callback()
+  {
+    if (received_ && first)
+    {
       pc2_o3d_ptr = std::make_shared<open3d::geometry::PointCloud>(pc2_o3d);
       open3d_conversions::rosToOpen3d(pc2_ros, *pc2_o3d_ptr);
       first = false;
       received_ = false;
     }
-    if (received_ && a) {
+    if (received_ && a)
+    {
       std::cout << "Timer callback" << std::endl;
       visualizer.RemoveGeometry(pc2_o3d_ptr);
       open3d_conversions::rosToOpen3d(pc2_ros, *pc2_o3d_ptr);
       visualizer.AddGeometry(pc2_o3d_ptr);
       pc2_o3d_ptr->EstimateNormals();
 
-      std::vector<double> radii{0.005, 0.01, 0.02, 0.04};
-      std::cout<< "Waiting for the mesh" << std::endl;
-      auto rec_mesh =
-          open3d::geometry::TriangleMesh::CreateFromPointCloudBallPivoting(
-              *pc2_o3d_ptr, radii);
+      std::cout << "Computing mesh from point cloud..." << std::endl;
+      // std::vector<double> radii{0.02, 0.2, 0.02, 0.04};
+      // auto mesh =
+      //     open3d::geometry::TriangleMesh::CreateFromPointCloudBallPivoting(
+      //         *pc2_o3d_ptr, radii);
+      // open3d::utility::VerbosityContextManager cm(open3d::utility::VerbosityLevel::Debug);
+      auto mesh_density = open3d::geometry::TriangleMesh::CreateFromPointCloudPoisson(*pc2_o3d_ptr, 15);
+      auto mesh = std::get<0>(mesh_density);
+
+
       // visualizer.AddGeometry(pc2_open3d_ptr);
-      visualizer.AddGeometry(rec_mesh);
+      visualizer.AddGeometry(mesh);
       received_ = false;
       first = false;
       a = false;
-      open3d::io::WriteTriangleMesh("mesh.ply", *rec_mesh);
-      exit(0);  
-    }
-    Eigen::Vector3d front = Eigen::Vector3d(0.014839371860051669, 0.38389557435654953, -0.92325726698047395);
-    Eigen::Vector3d lookat = Eigen::Vector3d(-0.30690958816078184, -1.0919699054014078, 2.653967750598559);
-    Eigen::Vector3d up = Eigen::Vector3d(-0.078439667039420083, -0.92006636317111679, -0.38382952725893771);
-    double zoom = 0.42;
-    // visualizer.GetViewControl().SetFront(front);
-    // visualizer.GetViewControl().SetLookat(lookat);
-    // visualizer.GetViewControl().SetUp(up);
-    // visualizer.GetViewControl().SetZoom(zoom);
+      open3d::io::WriteTriangleMesh("mesh.ply", *mesh);
+      std::cout << "Mesh Ready" << std::endl;
+      // rclcpp::shutdown();
 
-    visualizer.UpdateRender();
-    visualizer.PollEvents();
-    
+      Eigen::Vector3d front = Eigen::Vector3d(0.014839371860051669, 0.38389557435654953, -0.92325726698047395);
+      Eigen::Vector3d lookat = Eigen::Vector3d(-0.30690958816078184, -1.0919699054014078, 2.653967750598559);
+      Eigen::Vector3d up = Eigen::Vector3d(-0.078439667039420083, -0.92006636317111679, -0.38382952725893771);
+      double zoom = 0.5;
+      visualizer.GetViewControl().SetFront(front);
+      visualizer.GetViewControl().SetLookat(lookat);
+      visualizer.GetViewControl().SetUp(up);
+      visualizer.GetViewControl().SetZoom(zoom);
+      visualizer.UpdateRender();
+      visualizer.PollEvents();
+    }else{
+      visualizer.UpdateGeometry();
+      visualizer.PollEvents();
+    }
+
+    // sleep(10);
   }
 
-  void listener_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg) {
+  void listener_callback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
+  {
     pc2_ros = msg;
     received_ = true;
   }
@@ -87,7 +104,8 @@ class PCDListener : public rclcpp::Node {
   bool a = true;
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   rclcpp::init(argc, argv);
   auto node = std::make_shared<PCDListener>();
   rclcpp::spin(node);
