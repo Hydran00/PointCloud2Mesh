@@ -32,3 +32,6 @@ Thumbs.db
 
 # Ignore dependencies
 node_modules/
+
+**/**.pcd
+**/**.ply
