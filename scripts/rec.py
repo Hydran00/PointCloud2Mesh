@@ -54,7 +54,7 @@ class PCDListener(Node):
         converted_cloud = self.convertCloudFromRosToOpen3d(msg)
         # save ply
         # print("Saving the point cloud as a ply file")
-        open3d.io.write_point_cloud("luca.pcd", converted_cloud)
+        open3d.io.write_point_cloud("box.pcd", converted_cloud)
 
         # converted_cloud = open3d.io.read_point_cloud("copy_of_fragment.pcd")
         start = time.time()
@@ -65,7 +65,7 @@ class PCDListener(Node):
         converted_cloud.orient_normals_towards_camera_location(camera_location=np.array([0., 0., 0.]))
         end = time.time()
         print("Time taken: ",end-start)
-        open3d.io.write_point_cloud("luca_normals.pcd", converted_cloud)
+        open3d.io.write_point_cloud("box_normals.pcd", converted_cloud)
         # visualize
         self.vis.add_geometry(converted_cloud)
         print("Visualizing the point cloud")
@@ -92,15 +92,15 @@ class PCDListener(Node):
 
             # Get rgb
             # Check whether int or float
-            print("type(cloud_data[0][IDX_RGB_IN_FIELD]): ",type(cloud_data[0][IDX_RGB_IN_FIELD]))
-            if type(cloud_data[0][IDX_RGB_IN_FIELD])==float: # if float (from pcl::toROSMsg)
+            if type(cloud_data[0][IDX_RGB_IN_FIELD])==np.float32: # if float (from pcl::toROSMsg)
                 rgb = [utils.convert_rgbFloat_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
             else:
                 rgb = [utils.convert_rgbUint32_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
-
             # combine
+            # print color size
+            print("Color size: ",np.array(rgb).shape)
             open3d_cloud.points = open3d.utility.Vector3dVector(np.array(xyz))
-            # open3d_cloud.colors = open3d.Vector3dVector(np.array(rgb)/255.0)
+            open3d_cloud.colors = open3d.utility.Vector3dVector(np.array(rgb)/255.0)
         else:
             xyz = [(x,y,z) for x,y,z in cloud_data ] # get xyz
             open3d_cloud.points = open3d.utility.Vector3dVector(np.array(xyz))
