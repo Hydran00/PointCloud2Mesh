@@ -19,7 +19,8 @@ from nksr import Reconstructor, utils, fields
 
 DEVICE = torch.device("cuda:0")        
 LOAD_CAMERA_VIEW = True
-VISUALIZE_WITH_OPEN3D = False
+CAMERA_FILE_NAME = 'test2.json'
+VISUALIZE_WITH_OPEN3D = True
 class PCDListener(Node):
 
     def __init__(self):
@@ -40,14 +41,16 @@ class PCDListener(Node):
         self.load_camera_view = LOAD_CAMERA_VIEW
         self.param = None
         if self.load_camera_view:
-            self.param = open3d.io.read_pinhole_camera_parameters('test.json')
+            self.param = open3d.io.read_pinhole_camera_parameters(CAMERA_FILE_NAME)
             self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
         # flags
         self.received = False
         self.rendered_last = True
         self.cloud_received = False
-        self.first = True
+        self.first = False
         # subscriber    
+        # self.pcd_subscriber_ = self.create_subscription(
+        #     PointCloud2, '/filtered_pc2', self.listener_callback, 10)
         self.pcd_subscriber_ = self.create_subscription(
             PointCloud2, '/filtered_pc2', self.listener_callback, 10)
             # PointCloud2, '/camera/camera/depth/color/points', self.listener_callback, 10)
@@ -104,20 +107,20 @@ class PCDListener(Node):
             
             if self.load_camera_view:
                 self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
-            # if self.first:
-            #     self.first = False
+            if self.first:
+                self.first = False
             self.vis.add_geometry(self.mesh)
         else:
             # self.vis.poll_events()
             # self.vis.update_renderer()
-            mesh = visualizer.mesh(mesh.v, mesh.f, color=mesh.c)
-            visualizer.show_3d([mesh], [cloud])
+            new_mesh = visualizer.mesh(new_mesh.v, new_mesh.f, color=new_mesh.c)
+            visualizer.show_3d([new_mesh], [cloud])
 
         if VISUALIZE_WITH_OPEN3D and not self.load_camera_view:
-            if os.path.exists('test.json'):
-                os.remove('test.json')
+            if os.path.exists(CAMERA_FILE_NAME):
+                os.remove(CAMERA_FILE_NAME)
             param = self.vis.get_view_control().convert_to_pinhole_camera_parameters()
-            open3d.io.write_pinhole_camera_parameters('test.json', param)
+            open3d.io.write_pinhole_camera_parameters(CAMERA_FILE_NAME, param)
             print("Camera parameters saved")
 
 
@@ -133,6 +136,7 @@ class PCDListener(Node):
             print("Converting an empty cloud")
             return None
 
+        print("Converting a cloud with {} points".format(len(cloud_data)))
         # Set open3d_cloud
         if "rgb" in field_names:
             IDX_RGB_IN_FIELD=3 # x, y, z, rgb
