@@ -66,7 +66,7 @@ private:
           open3d::geometry::TriangleMesh::CreateFromPointCloudBallPivoting(
               *pc2_o3d_ptr, radii);
       // visualizer.AddGeometry(pc2_open3d_ptr);
-      visualizer.AddGeometry(mesh);
+      visualizer.AddGeometry(rec_mesh);
       received_ = false;
       first = false;
       a = false;
