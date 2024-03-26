@@ -16,14 +16,25 @@ import time
 # NKSR
 from pycg import vis as visualizer, exp
 from nksr import Reconstructor, utils, fields
-
+import copy
 DEVICE = torch.device("cuda:0")      
 VISUALIZE_WITH_OPEN3D = True # use open3D or pycg
 LOAD_CAMERA_VIEW = False  # if using open3D, load camera view set point from json, if false then the position is overwritten
-CAMERA_FILE_NAME = 'zed.json' # file with configuration
+CAMERA_FILE_NAME = 'icp.json' # file with configuration
 UPDATE_VIEWER = LOAD_CAMERA_VIEW # load just the first reconstruction for a visual inspection
 
-
+def draw_registration_result(source, target, transformation):
+    source_temp = copy.deepcopy(source)
+    target_temp = copy.deepcopy(target)
+    source_temp.paint_uniform_color([1, 0.706, 0])
+    target_temp.paint_uniform_color([0, 0.651, 0.929])
+    source_temp.transform(transformation)
+    open3d.visualization.draw_geometries([source_temp, target_temp],
+                                      zoom=0.4459,
+                                      front=[0.9288, -0.2951, -0.2242],
+                                      lookat=[1.6784, 2.0612, 1.4451],
+                                      up=[-0.3402, -0.9189, -0.1996])
+    
 class PCDListener(Node):
 
     def __init__(self):
@@ -97,41 +108,6 @@ class PCDListener(Node):
             self.rendered_last = False
             self.cloud_received = True
 
-    def create_mesh(self, cloud):
-
-        input_xyz = torch.from_numpy(np.asarray(cloud.points)).float().to(DEVICE)
-        input_normal = torch.from_numpy(np.asarray(cloud.normals)).float().to(DEVICE)
-        input_color = torch.from_numpy(np.asarray(cloud.colors)).float().to(DEVICE)
-        nksr = Reconstructor(DEVICE)
-        field = nksr.reconstruct(input_xyz, input_normal, detail_level=1.0)
-        field.set_texture_field(fields.PCNNField(input_xyz, input_color))
-        new_mesh = field.extract_dual_mesh(max_points=2 ** 22, mise_iter=1)
-    
-        print(torch.cuda.mem_get_info())
-        # if self.mesh is not None:
-        #     self.vis.remove_geometry(self.mesh)
-
-        if VISUALIZE_WITH_OPEN3D:
-            # self.mesh = open3d.geometry.TriangleMesh()
-            vertices_np = new_mesh.v.cpu().detach().numpy()
-            self.mesh.vertices = open3d.utility.Vector3dVector(vertices_np)
-            faces_np = new_mesh.f.cpu().detach().numpy()
-            self.mesh.triangles = open3d.utility.Vector3iVector(faces_np)
-            colors_np = new_mesh.c.cpu().detach().numpy()
-            self.mesh.vertex_colors = open3d.utility.Vector3dVector(colors_np)
-
-            self.vis.add_geometry(self.mesh)
-                    
-            if self.load_camera_view and UPDATE_VIEWER:
-                # load camera config
-                self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
-            
-            self.vis.poll_events()
-            self.vis.update_renderer()
-        else:
-            new_mesh = visualizer.mesh(new_mesh.v, new_mesh.f, color=new_mesh.c)
-            visualizer.show_3d([new_mesh], [cloud])
-
 
     def convertCloudFromRosToOpen3d(self,ros_cloud):
     
@@ -173,11 +149,33 @@ class PCDListener(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = PCDListener()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    # rclpy.init(args=args)
+    # node = PCDListener()
+    # rclpy.spin(node)
+    # node.destroy_node()
+    # rclpy.shutdown()
+    demo_icp_pcds = open3d.data.DemoICPPointClouds()
+    source = open3d.io.read_point_cloud(demo_icp_pcds.paths[0])
+    target = open3d.io.read_point_cloud(demo_icp_pcds.paths[1])
+    threshold = 0.02
+    trans_init = np.asarray([[0.862, 0.011, -0.507, 0.5],
+                            [-0.139, 0.967, -0.215, 0.7],
+                            [0.487, 0.255, 0.835, -1.4], [0.0, 0.0, 0.0, 1.0]])
+    draw_registration_result(source, target, trans_init)
+    print("Initial alignment")
+    evaluation = open3d.pipelines.registration.evaluate_registration(
+        source, target, threshold, trans_init)
+    print(evaluation)
+
+    print("Apply point-to-point ICP")
+    reg_p2p = open3d.pipelines.registration.registration_icp(
+        source, target, threshold, trans_init,
+    open3d.pipelines.registration.TransformationEstimationPointToPoint())
+    print(reg_p2p)
+    print("Transformation is:")
+    print(reg_p2p.transformation)
+    draw_registration_result(source, target, reg_p2p.transformation)
+
 
 
 if __name__ == '__main__':

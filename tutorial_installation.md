@@ -40,7 +40,9 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 apt-get install libx11-6 ffmpeg libsm6 libxext6 -y
 ```
 ### Exports
-
+```
+xhost +
+```
 <!-- ### Torch dependencises
 - Scatter
 ```

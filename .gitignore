@@ -36,3 +36,4 @@ node_modules/
 **/**.pcd
 **/**.ply
 scripts/__pycache__/
+*.json
