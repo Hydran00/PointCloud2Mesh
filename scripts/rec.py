@@ -49,17 +49,11 @@ class PCDListener(Node):
         # flags
         self.rendered_last = True
         self.cloud_received = False
-        self.first_already_rendered = False
         # subscriber    
         self.pcd_subscriber_ = self.create_subscription(
             PointCloud2, '/filtered_pc2', self.listener_callback, 10)
 
         self.timer_ = self.create_timer(0.01, self.timer_callback)
-        # self.timer_2 = self.create_timer(0.01, self.timer_callback2)
-
-    # def timer_callback2(self):
-    #     self.vis.poll_events()
-    #     self.vis.update_renderer()
 
     def timer_callback(self):
 
@@ -67,11 +61,11 @@ class PCDListener(Node):
         self.vis.update_renderer()
 
         if self.cloud_received:
-            if ((not UPDATE_VIEWER and not self.first_already_rendered) or (UPDATE_VIEWER)):
-                self.cloud_received = False
-                self.create_mesh(self.cloud)
-                self.rendered_last = True
-                self.first_already_rendered = True
+            self.cloud_received = False
+            self.create_mesh(self.cloud)
+            self.rendered_last = True
+
+
         if self.load_camera_view and UPDATE_VIEWER:
             # load camera config
             self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
@@ -86,7 +80,7 @@ class PCDListener(Node):
 
     def listener_callback(self, msg):
         # do not convert msg if the previous is not already processed
-        if self.rendered_last and ((not UPDATE_VIEWER and not self.first_already_rendered) or (UPDATE_VIEWER)):
+        if self.rendered_last:
             # Convert ROS PointCloud2 message to numpy arrays)
             converted_cloud = self.convertCloudFromRosToOpen3d(msg)
             # estimate normals
@@ -106,29 +100,27 @@ class PCDListener(Node):
         field = nksr.reconstruct(input_xyz, input_normal, detail_level=1.0)
         field.set_texture_field(fields.PCNNField(input_xyz, input_color))
         new_mesh = field.extract_dual_mesh(max_points=2 ** 22, mise_iter=1)
-    
-        print(torch.cuda.mem_get_info())
-        # if self.mesh is not None:
-        #     self.vis.remove_geometry(self.mesh)
 
         if VISUALIZE_WITH_OPEN3D:
-            # self.mesh = open3d.geometry.TriangleMesh()
+            # open3d visualizer
             vertices_np = new_mesh.v.cpu().detach().numpy()
             self.mesh.vertices = open3d.utility.Vector3dVector(vertices_np)
             faces_np = new_mesh.f.cpu().detach().numpy()
             self.mesh.triangles = open3d.utility.Vector3iVector(faces_np)
             colors_np = new_mesh.c.cpu().detach().numpy()
             self.mesh.vertex_colors = open3d.utility.Vector3dVector(colors_np)
-
             self.vis.add_geometry(self.mesh)
-                    
+            # add point cloud
+            # self.vis.add_geometry(cloud)
+            if not UPDATE_VIEWER:
+                self.vis.run()
             if self.load_camera_view and UPDATE_VIEWER:
                 # load camera config
                 self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
-            
             self.vis.poll_events()
             self.vis.update_renderer()
         else:
+            # pycg visualizer
             new_mesh = visualizer.mesh(new_mesh.v, new_mesh.f, color=new_mesh.c)
             visualizer.show_3d([new_mesh], [cloud])
 
@@ -142,10 +134,8 @@ class PCDListener(Node):
         # Check empty
         open3d_cloud = open3d.geometry.PointCloud()
         if len(cloud_data)==0:
-            print("Converting an empty cloud")
             return None
 
-        print("Converting a cloud with {} points".format(len(cloud_data)))
         # Set open3d_cloud
         if "rgb" in field_names:
             IDX_RGB_IN_FIELD=3 # x, y, z, rgb
@@ -160,7 +150,6 @@ class PCDListener(Node):
             else:
                 rgb = [rec_utils.convert_rgbUint32_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
             # combine
-            # print color size
             open3d_cloud.points = open3d.utility.Vector3dVector(np.array(xyz))
             open3d_cloud.colors = open3d.utility.Vector3dVector(np.array(rgb)/255.0)
         else:
