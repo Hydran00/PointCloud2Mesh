@@ -136,7 +136,7 @@ ICP Result with Point-to-Plane for RS415 @ 50cm </td>
         <td>Mean inlier RMSE </td>
     </tr>
     <tr>
-        <td>1.0</td>
+        <td>1.0 (?)</td>
         <td>0.01012</td>
     </tr>
 </table>
@@ -148,7 +148,7 @@ ICP Result with Point-to-Plane for Zed2 @ 50cm </td>
         <td>Mean inlier RMSE </td>
     </tr>
     <tr>
-        <td>1.0</td>
+        <td>1.0 (?)</td>
         <td>0.00740</td>
     </tr>
 </table>
