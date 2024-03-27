@@ -167,11 +167,11 @@ class PCDListener(Node):
 
 
 def main(args=None):
-    rclpy.init(args=args)
-    node = PCDListener()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
+    # rclpy.init(args=args)
+    # node = PCDListener()
+    # rclpy.spin(node)
+    # node.destroy_node()
+    # rclpy.shutdown()
 
 
     # print("Apply point-to-point ICP")
@@ -181,6 +181,18 @@ def main(args=None):
     # print(reg_p2p.transformation)
     # draw_registration_result(source, target, reg_p2p.transformation)
 
+    # read txt file that contains two values with numpy
+    with open('zed_50.txt', 'r') as data:
+            x = []
+            y = []
+            for line in data:
+                p = line.split()
+                x.append(float(p[0]))
+                y.append(float(p[1]))
+    print(x)
+    print(y)
+    print("Mean relative fitness: ",np.mean(x))
+    print("Mean inlier RMSE: ",np.mean(y))
 
 
 if __name__ == '__main__':

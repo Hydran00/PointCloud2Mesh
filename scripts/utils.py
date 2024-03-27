@@ -7,7 +7,7 @@ import copy
 
 
 CAMERA="ZED"
-SHOW_RESULT = True
+SHOW_RESULT = False
 
 
 
@@ -92,7 +92,7 @@ def trasform_cloud(cloud,gt):
         flip[2, 2] = -1.0
         cloud.transform(flip)
     else:
-        # flip by 90 degrees in the x-axis
+        # flip by 110 degrees in the x-axis
         flip = np.array([[1, 0, 0, 0],
                          [0, 0, -1, 0],
                          [0, 1, 0, 0],
@@ -127,7 +127,7 @@ def trasform_cloud(cloud,gt):
         flip[2, 3] = 0.45
     else:
         pass
-        flip[1, 3] = 0.13
+        flip[1, 3] = 0.14
         flip[2, 3] = 0.0
         flip[0, 3] = -0.5
 
