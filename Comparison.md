@@ -43,6 +43,14 @@ Steps:
             <td><img src="assets/eq_icp_ptplane.png" width="600"></td>
         </tr>
     </table>
-
+    First result for realsense 435:
+    <table>
+        <tr>
+            <td><img src="assets/rs_icp_50cm.png" width="400"></td>
+        </tr>
+        <tr>
+            <td>ICP Result with Point-to-Plane for RS435 @ 50cm </td>
+        </tr>
+    </table>
 
 4. Compare results
