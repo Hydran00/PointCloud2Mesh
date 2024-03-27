@@ -4,6 +4,13 @@ import numpy as np
 import open3d
 from sensor_msgs_py import point_cloud2 as pc2
 import copy
+
+
+CAMERA="ZED"
+SHOW_RESULT = True
+
+
+
 # The data structure of each point in ros PointCloud2: 16 bits = x + y + z + rgb
 FIELDS_XYZ = [
     PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
@@ -22,6 +29,8 @@ convert_rgbUint32_to_tuple = lambda rgb_uint32: (
 convert_rgbFloat_to_tuple = lambda rgb_float: convert_rgbUint32_to_tuple(
     int(cast(pointer(c_float(rgb_float)), POINTER(c_uint32)).contents.value)
 )
+
+
 
 def convertCloudFromRosToOpen3d(ros_cloud):
 
@@ -68,17 +77,39 @@ def draw_registration_result(source, target, transformation, paint=False):
     open3d.visualization.draw_geometries([source_temp, target_temp])
 
 
-def trasform_cloud(cloud):
+def trasform_cloud(cloud,gt):
+    open3d.visualization.draw_geometries([cloud])
+
     # crop on the z-axis
     # bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.04, -0.0, 0.0), max_bound=(0.06, 0.15, 0.6)) # @ 50cm
-    bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.08, -0.02, 0.0), max_bound=(0.08, 0.14, 0.6)) # @ 40cm
-    cloud = cloud.crop(bbox)
 
-    # flip by 180 degrees in the x-axis
-    flip = np.eye(4)
-    flip[1, 1] = -1
-    flip[2, 2] = -1
-    cloud.transform(flip)
+    # cloud = cloud.crop(bbox)
+
+    if CAMERA == "RS":
+        # flip by 180 degrees in the x-axis
+        flip = np.eye(4)
+        flip[1, 1] = -1.0
+        flip[2, 2] = -1.0
+        cloud.transform(flip)
+    else:
+        # flip by 90 degrees in the x-axis
+        flip = np.array([[1, 0, 0, 0],
+                         [0, 0, -1, 0],
+                         [0, 1, 0, 0],
+                         [0, 0, 0, 1]])
+        cloud.transform(flip)
+        # # flip by 180 degrees in the y-axis
+        flip = np.array([[1, 0, 0, 0],
+                            [0, -1, 0, 0],
+                            [0, 0, -1, 0],
+                            [0, 0, 0, 1]])
+        cloud.transform(flip)
+        bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-1, -1, -0.05), max_bound=(1, 1 , 0.05))
+        cloud = cloud.crop(bbox)
+        
+    # if SHOW_RESULT:
+    #     print("Transformed cloud 1")
+    #     open3d.visualization.draw_geometries([cloud,gt])
     
     # translate the cloud by 0.5 in the x-axis
     trans = np.eye(4)
@@ -91,33 +122,44 @@ def trasform_cloud(cloud):
     # translate the cloud by 0.5 in the x-axis
     flip = np.eye(4)
     # flip[0, 3] =0.05
-    flip[1, 3] =0.15
-    flip[2, 3] =0.45
+    if CAMERA == "RS":
+        flip[1, 3] = 0.15
+        flip[2, 3] = 0.45
+    else:
+        pass
+        flip[1, 3] = 0.25
+        flip[2, 3] = 0.0
+        flip[0, 3] = -0.5
+
     cloud.transform(flip)
     return cloud
 
 
 def evaluate_sensor(cloud):
+    print("Evaluate sensor")
     # load ground truth
     gt = open3d.io.read_point_cloud("../assets/Pepsi_Can.ply")
-
-    # open3d.visualization.draw_geometries([cloud,gt])
+    # if SHOW_RESULT:
+    #     print("Ground truth")
+    #     open3d.visualization.draw_geometries([cloud,gt])
 
     # perform point-to-point ICP
-    threshold = 0.2
     
-    cloud = trasform_cloud(cloud)
-
-    print("Transformed cloud")
-    open3d.visualization.draw_geometries([cloud,gt])
+    cloud = trasform_cloud(cloud,gt)
+    
+    if SHOW_RESULT:
+        print("Transformed cloud 2")
+        open3d.visualization.draw_geometries([cloud,gt])
 
 
     print("Apply Vanilla point-to-plane ICP")
+    threshold = 0.1
     algorithm = open3d.pipelines.registration.TransformationEstimationPointToPoint()
     reg_p2p = open3d.pipelines.registration.registration_icp(
         cloud, gt, threshold, np.eye(4), algorithm)
     
-    # draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
+    if SHOW_RESULT:
+        draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
 
     
     # print("Apply point-to-plane ICP with robust kernel")
@@ -131,13 +173,13 @@ def evaluate_sensor(cloud):
     
     # draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
 
-    with open("realsense@40.txt", "a") as myfile:
+    with open("zed@50.txt", "a") as myfile:
         # save relative fitness and inlier RMSE 
         myfile.write(str(reg_p2p.fitness) + " " + str(reg_p2p.inlier_rmse) + "\n")
 
-    print(reg_p2p)
-    print("Transformation is:")
-    print(reg_p2p.transformation)
+    # print(reg_p2p)
+    # print("Transformation is:")
+    # print(reg_p2p.transformation)
     
     # evaluation = open3d.pipelines.registration.evaluate_registration(
     # cloud, gt, threshold, np.eye(4))
@@ -151,7 +193,7 @@ def evaluate_sensor(cloud):
     # cloud.estimate_normals(
     #     search_param=open3d.geometry.KDTreeSearchParamHybrid(radius=0.1, max_nn=30))
     # # Flip the normal
-    # cloud.orient_normals_towards_camera_location()
+    # cloud.orient_normals_towards_CAMERA_location()
     # # Compute the FPFH feature
     # radius_normal = voxel_size * 2
 

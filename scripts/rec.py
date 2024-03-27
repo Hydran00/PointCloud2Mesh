@@ -110,7 +110,7 @@ class PCDListener(Node):
             self.mesh.triangles = open3d.utility.Vector3iVector(faces_np)
             colors_np = new_mesh.c.cpu().detach().numpy()
             self.mesh.vertex_colors = open3d.utility.Vector3dVector(colors_np)
-            self.vis.add_geometry(self.mesh)
+            # self.vis.add_geometry(self.mesh)
             # add point cloud
             # self.vis.add_geometry(cloud)
             if not UPDATE_VIEWER:
