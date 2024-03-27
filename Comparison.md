@@ -34,7 +34,7 @@ Steps:
         </tr>
     </table>
 
-3. <b>Apply `ICP` with the point cloud extracted from the CAD of the same object and the measured one to align points.</b>
+3. <b>Apply `ICP` between the point cloud extracted from the CAD of the same object and the measured one to align points.</b>
     <table>
         <tr>
             <td><img src="assets/eq_icp_ptpoint.png" width="600"></td>
