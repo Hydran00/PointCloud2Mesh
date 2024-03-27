@@ -127,7 +127,7 @@ def trasform_cloud(cloud,gt):
         flip[2, 3] = 0.45
     else:
         pass
-        flip[1, 3] = 0.25
+        flip[1, 3] = 0.13
         flip[2, 3] = 0.0
         flip[0, 3] = -0.5
 

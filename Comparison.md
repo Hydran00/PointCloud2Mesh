@@ -97,12 +97,29 @@ First result for RS415:
     </tr>
 </table>
 
+Zed result after adding lighting:
+
+<table>
+    <tr>
+        <td><img src="assets/zed_best_front.png" width="400"></td>
+        <td><img src="assets/zed_best_left.png" width="400"></td>
+        <td><img src="assets/zed_best_right.png" width="400"></td>
+        <td><img src="assets/zed_best_top.png" width="400"></td>
+    </tr>
+    <tr>
+        <td>Front</td>
+        <td>Left</td>
+        <td>Right</td>
+    </tr>
+</table>
+
+
 ### 5. Compare results
 Metrics for ICP:  
 `fitness`: measures the overlapping area (# of inlier correspondences / # of points in target). The higher the better.  
 `inlier_rmse`: measures the RMSE of all inlier correspondences. The lower the better.  
 
-<table>
+<!-- <table>
     <tr>
         <td><img src="assets/rs_icp_50cm.png" width="400"></td>
         <td><img src="assets/zed_icp_50cm.png" width="400"></td>
@@ -111,4 +128,4 @@ Metrics for ICP:
         <td>ICP Result with Point-to-Plane for RS435 @ 50cm </td>
         <td>ICP Result with Point-to-Plane for Zed2 @ 50cm </td>
     </tr>
-</table>
+</table> -->
