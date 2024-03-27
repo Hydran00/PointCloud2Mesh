@@ -31,6 +31,7 @@ class PCDListener(Node):
         # point cloud
         self.pc2_ros = None
         self.device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+        print("Using device: ", self.device)
         self.xyz = None
         self.normal = None
         self.color = None
@@ -113,7 +114,8 @@ class PCDListener(Node):
             # add point cloud
             # self.vis.add_geometry(cloud)
             if not UPDATE_VIEWER:
-                self.vis.run()
+                # self.vis.run()
+                rec_utils.evaluate_sensor(cloud)
             if self.load_camera_view and UPDATE_VIEWER:
                 # load camera config
                 self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
