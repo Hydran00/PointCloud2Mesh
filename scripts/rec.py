@@ -82,7 +82,7 @@ class PCDListener(Node):
         # do not convert msg if the previous is not already processed
         if self.rendered_last:
             # Convert ROS PointCloud2 message to numpy arrays)
-            converted_cloud = self.convertCloudFromRosToOpen3d(msg)
+            converted_cloud = rec_utils.convertCloudFromRosToOpen3d(msg)
             # estimate normals
             converted_cloud.estimate_normals(search_param=open3d.geometry.KDTreeSearchParamHybrid(radius=1, max_nn=40))
             # orient normals towards the camera
@@ -92,7 +92,7 @@ class PCDListener(Node):
             self.cloud_received = True
 
     def create_mesh(self, cloud):
-
+        
         input_xyz = torch.from_numpy(np.asarray(cloud.points)).float().to(DEVICE)
         input_normal = torch.from_numpy(np.asarray(cloud.normals)).float().to(DEVICE)
         input_color = torch.from_numpy(np.asarray(cloud.colors)).float().to(DEVICE)
@@ -125,40 +125,7 @@ class PCDListener(Node):
             visualizer.show_3d([new_mesh], [cloud])
 
 
-    def convertCloudFromRosToOpen3d(self,ros_cloud):
-    
-        # Get cloud data from ros_cloud
-        field_names=[field.name for field in ros_cloud.fields]
-        cloud_data = list(pc2.read_points(ros_cloud, skip_nans=True, field_names = field_names))
 
-        # Check empty
-        open3d_cloud = open3d.geometry.PointCloud()
-        if len(cloud_data)==0:
-            return None
-
-        # Set open3d_cloud
-        if "rgb" in field_names:
-            IDX_RGB_IN_FIELD=3 # x, y, z, rgb
-            
-            # Get xyz
-            xyz = [(x,y,z) for x,y,z,rgb in cloud_data ] # (why cannot put this line below rgb?)
-
-            # Get rgb
-            # Check whether int or float
-            if type(cloud_data[0][IDX_RGB_IN_FIELD])==np.float32: # if float (from pcl::toROSMsg)
-                rgb = [rec_utils.convert_rgbFloat_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
-            else:
-                rgb = [rec_utils.convert_rgbUint32_to_tuple(rgb) for x,y,z,rgb in cloud_data ]
-            # combine
-            open3d_cloud.points = open3d.utility.Vector3dVector(np.array(xyz))
-            open3d_cloud.colors = open3d.utility.Vector3dVector(np.array(rgb)/255.0)
-        else:
-            xyz = [(x,y,z) for x,y,z in cloud_data ] # get xyz
-            open3d_cloud.points = open3d.utility.Vector3dVector(np.array(xyz))
-
-        # return
-
-        return open3d_cloud
 
 
 def main(args=None):
