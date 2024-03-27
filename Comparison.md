@@ -120,6 +120,7 @@ Zed result after adding lighting:
         <td>Front</td>
         <td>Left</td>
         <td>Right</td>
+        <td>Top</td>
     </tr>
 </table>
 
@@ -152,5 +153,10 @@ ICP Result with Point-to-Plane for Zed2 @ 50cm </td>
         <td>0.00740</td>
     </tr>
 </table>
+
+### Interesting reference
+[Mean Map Entropy (MME)](https://map-metrics.readthedocs.io/en/latest/usage.html)  
+[Point Cloud Evaluation](https://github.com/JokerJohn/Cloud_Map_Evaluation)  
+
 
 
