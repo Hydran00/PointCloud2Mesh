@@ -3,7 +3,7 @@
 docker pull nvidia/docker:11.8.0-cudnn8-devel-ubuntu22.04
 ```
 ### Enter docker
-alias doc='sudo docker run --rm -it -v ~/shared/:/root/shared --network=host --gpus all --env DISPLAY=$DISPLAY d0117ee15b5f bash'
+alias doc='sudo docker run --rm -it -v ~/shared/:/root/shared --network=host --ipc=host --gpus all --env DISPLAY=$DISPLAY 3d_rec:ros2 bash'
 ### Update
 ```
 apt-get update
@@ -40,9 +40,7 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 apt-get install libx11-6 ffmpeg libsm6 libxext6 -y
 ```
 ### Exports
-```
-xhost +
-```
+
 <!-- ### Torch dependencises
 - Scatter
 ```
@@ -51,4 +49,3 @@ pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.1+cu118.html
 - Cluster
 ```
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.2.1+cu118.html -->
-``` -->
