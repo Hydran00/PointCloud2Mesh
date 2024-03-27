@@ -16,6 +16,14 @@ Steps:
 2. <b>Collect multiple measurements of a Coke can from different distances and orientation with the two sensors.</b>
     <table>
         <tr>
+            <td><img src="assets/setup.jpg" width="500"></td>
+        </tr>
+        <tr>
+            <td>Setup (non posso fare di meglio finche non arriva la prolunga USB 😖)</td>
+        </tr>
+    </table>
+    <table>
+        <tr>
             <td><img src="assets/rs_pc_40cm.png" width="300"></td>
             <td><img src="assets/rs_pc_50cm.png" width="300"></td>
         </tr>
