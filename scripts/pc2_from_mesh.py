@@ -2,8 +2,8 @@ import numpy as np
 import open3d as o3d
 import open3d.visualization.rendering as rendering
 import trimesh as tm
-OBJ_PATH = "PepsiCan/Pepsi_Can2.obj"
-SAVE_PATH = "Pepsi_Can.ply"
+OBJ_PATH = "../assets/Pepsi_Can.obj"
+SAVE_PATH = "../assets/Pepsi_Can.ply"
 def get_pc_from_mesh():
     # tm_mesh = tm.load("PepsiCan/Pepsi_Can.obj")
     # # tm_mesh.show()

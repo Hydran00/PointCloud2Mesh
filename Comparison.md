@@ -10,7 +10,7 @@ Steps:
         </tr>
         <tr>
             <td>Verità-Terra Mesh</td>
-            <td>Verità-Terra Point Cloud</td>
+            <td>Verità-Terra Point Cloud (200k points)</td>
         </tr>
     </table>
 2. <b>Collect multiple measurements of a Coke can from different distances and orientation with the two sensors.</b>
@@ -37,10 +37,10 @@ Steps:
 3. <b>Apply `ICP` with the point cloud extracted from the CAD of the same object and the measured one to align points.</b>
     <table>
         <tr>
-            <td><img src="assets/rs_pc_icp_50cm.png" width="300"></td>
+            <td><img src="assets/eq_icp_ptpoint.png" width="600"></td>
         </tr>
         <tr>
-            <td>RS435 @ 50cm ICP</td>
+            <td><img src="assets/eq_icp_ptplane.png" width="600"></td>
         </tr>
     </table>
 
