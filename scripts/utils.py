@@ -58,41 +58,93 @@ def convertCloudFromRosToOpen3d(ros_cloud):
 
     return open3d_cloud
 
-def draw_registration_result(source, target, transformation):
+def draw_registration_result(source, target, transformation, paint=False):
     source_temp = copy.deepcopy(source)
     target_temp = copy.deepcopy(target)
-    source_temp.paint_uniform_color([1, 0.706, 0])
-    target_temp.paint_uniform_color([0, 0.651, 0.929])
+    if paint:
+        source_temp.paint_uniform_color([1, 0.706, 0])
+        target_temp.paint_uniform_color([0, 0.651, 0.929])
     source_temp.transform(transformation)
     open3d.visualization.draw_geometries([source_temp, target_temp])
+
+
+def trasform_cloud(cloud):
+    # crop on the z-axis
+    # bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.04, -0.0, 0.0), max_bound=(0.06, 0.15, 0.6)) # @ 50cm
+    bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.08, -0.02, 0.0), max_bound=(0.08, 0.14, 0.6)) # @ 40cm
+    cloud = cloud.crop(bbox)
+
+    # flip by 180 degrees in the x-axis
+    flip = np.eye(4)
+    flip[1, 1] = -1
+    flip[2, 2] = -1
+    cloud.transform(flip)
+    
+    # translate the cloud by 0.5 in the x-axis
+    trans = np.eye(4)
+    trans[0, 3] = 0.5
+    
+    cloud_bef = copy.deepcopy(cloud)
+    cloud_bef.transform(trans)
+    # draw_registration_result(cloud, cloud_bef, trans)
+
+    # translate the cloud by 0.5 in the x-axis
+    flip = np.eye(4)
+    # flip[0, 3] =0.05
+    flip[1, 3] =0.15
+    flip[2, 3] =0.45
+    cloud.transform(flip)
+    return cloud
+
 
 def evaluate_sensor(cloud):
     # load ground truth
     gt = open3d.io.read_point_cloud("../assets/Pepsi_Can.ply")
-    
+
+    # open3d.visualization.draw_geometries([cloud,gt])
+
     # perform point-to-point ICP
-    threshold = 10.0
-    cloud_bef = copy.deepcopy(cloud)
-    # crop on the z-axis
-    # bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.04, -0.0, 0.0), max_bound=(0.06, 0.15, 0.6)) # @ 50cm
-    bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.08, -0.0, 0.0), max_bound=(0.08, 0.15, 0.6)) # @ 40cm
+    threshold = 0.2
+    
+    cloud = trasform_cloud(cloud)
 
-    cloud = cloud.crop(bbox)
+    print("Transformed cloud")
+    open3d.visualization.draw_geometries([cloud,gt])
 
-    # translate the cloud by 0.5 in the x-axis
-    trans = np.eye(4)
-    trans[0, 3] = 0.5
-    draw_registration_result(cloud, cloud_bef, trans)
 
-    print("Apply point-to-point ICP")
+    print("Apply Vanilla point-to-plane ICP")
+    algorithm = open3d.pipelines.registration.TransformationEstimationPointToPoint()
     reg_p2p = open3d.pipelines.registration.registration_icp(
-        cloud, gt, threshold, np.eye(4),
-        open3d.pipelines.registration.TransformationEstimationPointToPlane())
+        cloud, gt, threshold, np.eye(4), algorithm)
+    
+    # draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
+
+    
+    # print("Apply point-to-plane ICP with robust kernel")
+    # sigma = 0.01
+    # loss = open3d.pipelines.registration.TukeyLoss(k=sigma)
+    # algorithm = open3d.pipelines.registration.TransformationEstimationPointToPlane(loss)
+    # reg_p2p = open3d.pipelines.registration.registration_icp(
+    #     cloud, gt, threshold, np.eye(4), algorithm,
+    #       open3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=1000)
+    # )
+    
+    # draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
+
+    with open("realsense@40.txt", "a") as myfile:
+        # save relative fitness and inlier RMSE 
+        myfile.write(str(reg_p2p.fitness) + " " + str(reg_p2p.inlier_rmse) + "\n")
+
     print(reg_p2p)
     print("Transformation is:")
     print(reg_p2p.transformation)
-    draw_registration_result(cloud, gt, reg_p2p.transformation)
-    exit()                         
+    
+    # evaluation = open3d.pipelines.registration.evaluate_registration(
+    # cloud, gt, threshold, np.eye(4))
+    
+    # print(evaluation, "\n")
+    
+    # exit()                         
     # show the result
 
     # # Estimate normals

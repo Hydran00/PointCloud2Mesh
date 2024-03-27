@@ -1,6 +1,28 @@
 ### Methodology
 We would like to understand what is the best sensor between the `zed` and the `realsense 435`.  
-Steps:  
+0. Visual analysis
+<table>
+    <tr>
+        <td><img src="assets/rs_40cm.png" width="300"></td>
+        <td><img src="assets/zed_40cm.png" width="300"></td>
+    </tr>
+    <tr>
+        <td>rs415 @ 40cm</td>
+        <td>zed2  @ 40cm</td>
+    </tr>
+    <tr>
+        <td><img src="assets/rs_80cm.png" width="300"></td>
+        <td><img src="assets/zed_80cm.png" width="300"></td>
+    </tr>
+    <tr>
+        <td>rs415 @ 80cm</td>
+        <td>zed2  @ 80cm</td>
+    </tr>
+</table>
+
+From a visual inspection, the point cloud from the `zed` seems to be more noisy than the one from the `realsense`.
+
+<b>IDEA: Compare both sensors against the same ground truth using ICP for alignment.</b>  
 1. <b>Extract colored point cloud from 3D model using uniform sampling function</b>
     <!-- insert images  one near by the other-->
     <table>
@@ -51,7 +73,7 @@ Steps:
             <td><img src="assets/eq_icp_ptplane.png" width="600"></td>
         </tr>
     </table>
-    First result for realsense 435:
+    First result for RS415:
     <table>
         <tr>
             <td><img src="assets/rs_icp_50cm.png" width="400"></td>
@@ -62,3 +84,7 @@ Steps:
     </table>
 
 4. Compare results
+Metrics for ICP:  
+`fitness`: measures the overlapping area (# of inlier correspondences / # of points in target). The higher the better.  
+`inlier_rmse`: measures the RMSE of all inlier correspondences. The lower the better.  
+
