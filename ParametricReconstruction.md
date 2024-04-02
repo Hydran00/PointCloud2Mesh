@@ -38,10 +38,11 @@ Union of SMPL, MANO and FLAME for an accurate reconstruction of the human body w
   - [OSX](https://github.com/IDEA-Research/OSX) -> Not working (cuda dependencies...)
   - [Occlusion Fusion](https://github.com/wenbin-lin/OcclusionFusion) -> Interesting approach but it does not uses SMPL
   -  [WHAM](https://github.com/yohanshin/WHAM) -> Not able to make it work 
-PRO:
-    - IDK... they should be faster if I managed to make them work
-CONS:
-    - RGB-based seems to be very imprecise 
+
+**PRO:**  
+    - IDK... they should be faster if I managed to make them work  
+**CONS:**  
+    - RGB-based seems to be very imprecise  
   
 **Problem: Many of them works with RGB camera (no depth) so the resulting mesh is not spatially accurated**
 
@@ -69,9 +70,9 @@ I tried this metric as a loss function and I optimised it with respect to the pa
     </tr>
 </table>
 
-PRO:   
-    - Estremely good result with respect to RGB-based reconstruction  since we can exploit pointclouds
-CONS:  
+**PRO:**   
+    - Estremely good result with respect to RGB-based reconstruction  since we can exploit pointclouds  
+**CONS:**  
     - Very slow (30 iteration/second -> 1 FPS accepting 30 iterations)  
     - The metric used in the implementation found is known to be affect by the following issue
   
