@@ -54,7 +54,7 @@ Minimise a metrics online in an iterative way (like ICP).
 
 <img src="assets/human_rec/chamfer.png" width="300">
 
-I tried threating this metric as a loss and optimise it with respect to the parameters of the SMPL model.
+I tried this metric as a loss function and I optimised it with respect to the parameters of the SMPL model. (not me, a guy on GitHub)
 <table>
     <tr>
         <td><img src="assets/human_rec/opt0.png" width="400"></td>
