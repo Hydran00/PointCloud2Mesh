@@ -78,6 +78,33 @@ I tried this metric as a loss function and I optimised it with respect to the pa
   
 <img src="assets/human_rec/chamfer_problem.png" width="400">
 
+---
+#### Testing on myself
+<table>
+    <tr>
+        <td>Initial conditions</td>
+        <td>Result after 600 iterations</td>
+    </tr>
+    <tr>
+        <td><img src="assets/human_rec/start_me.png" width="400"></td>
+        <td><img src="assets/human_rec/result_me.png" width="400"></td>
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>Initial conditions</td>
+        <td>Result after 1800 iterations</td>
+    </tr>
+    <tr>
+        <td><img src="assets/human_rec/start_me2.png" width="400"></td>
+        <td><img src="assets/human_rec/result_me2.png" width="400"></td>
+    </tr>
+</table>
+
+<img src="assets/human_rec/best_me.png" width="400">
+
+![alt text](image.png)
+
 ### Question 2: What do we really need? Real time capabilities vs Final Quality
 
 My idea: Use filtered point cloud for the visualization since it runs 30FPS and the parametrised model for robot controller and maybe stiffness visualization with heatmaps.

@@ -261,19 +261,19 @@ def evaluate_sensor(cloud):
     return 
 
 def crop_cloud(cloud):
-    x_min = -0.8
-    x_max = 0.1
-    y_min = -1.0
-    y_max = 1.0
+    x_min = -1.6
+    x_max = 1
+    y_min = -1.9
+    y_max = 0.8 
     z_min = 0.0
-    z_max = 2.35
+    z_max = 2.46
 
     bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(x_min, y_min, z_min), max_bound=(x_max, y_max, z_max))
     cloud = cloud.crop(bbox)
     return cloud
 
 if __name__ == "__main__":
-    cloud = open3d.io.read_point_cloud("clown_cloud.ply")
+    cloud = open3d.io.read_point_cloud("clown_cloud2.ply")
     cloud = crop_cloud(cloud)
     # rotate by 180 degrees in the z-axis
     flip = np.eye(4)
@@ -285,7 +285,17 @@ if __name__ == "__main__":
     flip[0, 0] = -1.0
     flip[2, 2] = -1.0
     cloud = cloud.transform(flip)
-    
+    # translate the cloud by -2.5 in the y-axis
+    flip = np.eye(4)
+    flip[0, 3] = 0.3
+    flip[1, 3] = -0.3
+    flip[2, 3] = 2.4
+
+    cloud = cloud.transform(flip)
     open3d.visualization.draw_geometries([cloud])
+    # outlier removal
+    cloud, ind = cloud.remove_statistical_outlier(nb_neighbors=1000, std_ratio=2.0)
+    open3d.visualization.draw_geometries([cloud])
+
     # save
-    open3d.io.write_point_cloud("crop_clown_cloud.ply", cloud)
+    open3d.io.write_point_cloud("crop_clown_cloud2.ply", cloud)
