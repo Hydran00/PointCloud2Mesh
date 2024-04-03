@@ -80,24 +80,28 @@ class PCDListener(Node):
     
 
     def listener_callback(self, msg):
+        print("Received point cloud")
         # do not convert msg if the previous is not already processed
         if self.rendered_last:
             # Convert ROS PointCloud2 message to numpy arrays)
             converted_cloud = rec_utils.convertCloudFromRosToOpen3d(msg)
+            print("Point cloud converted")
             # estimate normals
-            converted_cloud.estimate_normals(radius=1, max_nn=40)
+            converted_cloud.estimate_normals(radius=0.10, max_nn=20)
+            print("Normals estimated")
             # orient normals towards the camera
             converted_cloud.orient_normals_towards_camera_location(camera_location=np.array([0., 0., 0.]))
-            # draw geom
             self.cloud = converted_cloud
             self.rendered_last = False
             self.cloud_received = True
             # self.create_mesh(converted_cloud)
-            rec_utils.evaluate_sensor(self.cloud)
+            # rec_utils.evaluate_sensor(self.cloud)
             # # save ply
-            # print("Saving point cloud")
-            # open3d.t.io.write_point_cloud("cloud.ply", converted_cloud)
-            # time.sleep(5.0)
+            # draw geom
+            print("Saving point cloud")
+            open3d.t.io.write_point_cloud("clown_cloud6.ply", converted_cloud)
+            open3d.visualization.draw_geometries([converted_cloud.to_legacy()])
+            time.sleep(5.0)
 
     def create_mesh(self, cloud):
         cloud = cloud.cuda(0)
