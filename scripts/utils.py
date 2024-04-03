@@ -11,9 +11,12 @@ import copy
 treg = open3d.t.pipelines.registration
 
 
-CAMERA="ZED"
-SHOW_RESULT = True
-gt = open3d.t.io.read_point_cloud("../assets/Pepsi_Can.ply")
+CAMERA="RS"
+SHOW_RESULT = False
+# gt = open3d.t.io.read_point_cloud("../assets/Pepsi_Can.ply")
+# gt = open3d.t.io.read_point_cloud("../assets/box.ply")
+# gt = open3d.t.geometry.TriangleMesh.create_box(#width=0.09138, 0.0520 depth=0.14420
+gt = open3d.geometry.TriangleMesh.create_box(width=0.09138, height=0.0520, depth=0.14420).compute_vertex_normals().sample_points_uniformly(number_of_points=10000)
 
 
 
@@ -81,8 +84,9 @@ def draw_registration_result(source, target, transformation, paint=False):
         source.paint_uniform_color([1, 0.706, 0])
         target.paint_uniform_color([0, 0.651, 0.929])
     source.transform(transformation)
-    source = source.to_legacy()
-    target = target.to_legacy()
+    if hasattr(source, 'to_legacy') and callable(source.to_legacy):
+        source = source.to_legacy()
+        target = target.to_legacy()
     open3d.visualization.draw_geometries([source, target])
 
 
@@ -94,53 +98,64 @@ def trasform_cloud(cloud,gt):
 
     # cloud = cloud.crop(bbox)
 
-    if CAMERA == "RS":
+    if CAMERA == "ZED":
+        # convert from zed frame to realsense frame
+        flip = np.eye(4)
+        # rotate by -90 degrees in the z-axis
+        flip1 = np.array([[0.0,  1.0,  0.0, 0.0],
+                        [-1.0,  0.0,  0.0, 0.0],
+                        [0.0,  0.0,  1.0, 0.0],
+                        [0.0,  0.0,  0.0, 1.0]])
+        cloud = cloud.transform(flip1)
+        # rotate by -90 degrees in the x-axis
+        flip2 = np.array([[1.0,  0.0,  0.0, 0.0],
+                        [0.0,  0.0,  1.0, 0.0],
+                        [0.0,  -1.0,  0.0, 0.0],
+                        [0.0,  0.0,  0.0, 1.0]])
+        cloud = cloud.transform(flip2)
+        # rotate by 180 degrees in the y-axis
+        flip3 = np.array([[-1.0,  0.0,  0.0, 0.0],
+                        [0.0,  1.0,  0.0, 0.0],
+                        [0.0,  0.0,  -1.0, 0.0],
+                        [0.0,  0.0,  0.0, 1.0]])
+        cloud = cloud.transform(flip3)
+        
+    else:
         # flip by 180 degrees in the x-axis
         flip = np.eye(4)
         flip[1, 1] = -1.0
         flip[2, 2] = -1.0
-        cloud.transform(flip)
-    else:
-        # flip by 110 degrees in the x-axis
-        flip = np.array([[1, 0, 0, 0],
-                         [0, 0, -1, 0],
-                         [0, 1, 0, 0],
-                         [0, 0, 0, 1]])
-        cloud.transform(flip)
-        # # flip by 180 degrees in the y-axis
-        flip = np.array([[1, 0, 0, 0],
-                            [0, -1, 0, 0],
-                            [0, 0, -1, 0],
-                            [0, 0, 0, 1]])
-        cloud.transform(flip)
+        cloud = cloud.transform(flip)
         
-        bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-1, -1, -0.05), max_bound=(1, 1 , 0.05))
-        cloud = cloud.crop(bbox)        
     # if SHOW_RESULT:
     #     print("Transformed cloud 1")
     #     open3d.visualization.draw_geometries([cloud,gt])
     
     # translate the cloud by 0.5 in the x-axis
-    trans = np.eye(4)
-    trans[0, 3] = 0.5
-    
-    cloud_bef = copy.deepcopy(cloud)
-    cloud_bef.transform(trans)
+
     # draw_registration_result(cloud, cloud_bef, trans)
 
-    # translate the cloud by 0.5 in the x-axis
     flip = np.eye(4)
-    # flip[0, 3] =0.05
     if CAMERA == "RS":
-        flip[1, 3] = 0.15
-        flip[2, 3] = 0.45
+        bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.08, -0.35, -0.75), max_bound=(0.04, -0.0 , -0.5))
+        cloud = cloud.crop(bbox)
+        flip[1, 3] = 0.2
+        flip[2, 3] = 0.68
     else:
+        flip[0, 3] = -0.08
+        flip[1, 3] = 0.14
+        flip[2, 3] = 0.74
         pass
-        flip[1, 3] = 0.17
-        flip[2, 3] = 0.0
-        flip[0, 3] = -0.5
-
-    cloud.transform(flip)
+    cloud = cloud.transform(flip)
+    # 30 degree in y-axis 
+    if CAMERA == "ZED":
+        bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(-0.05, 0.0, -0.2), max_bound=(0.2, 0.25 , 0.7))
+        cloud = cloud.crop(bbox)  
+    flip = np.array([ [ 0.8660254,  0.0000000,  0.5000000,0],
+                        [0.0000000,  1.0000000,  0.0000000,0],
+                        [-0.5000000,  0.0000000,  0.8660254,0],
+                        [0, 0, 0, 1]])
+    cloud = cloud.transform(flip)
     return cloud
 
 
@@ -152,109 +167,72 @@ def evaluate_sensor(cloud):
 
     global gt
     cloud = cloud.to_legacy()
-    gt = gt.to_legacy()
+    # gt = gt.to_legacy()
     cloud = trasform_cloud(cloud,gt)
+
 
     if SHOW_RESULT:
         print("Transformed cloud 2")
-        open3d.visualization.draw_geometries([cloud,gt])
-
-
-    print("Apply Vanilla point-to-plane ICP")
-    threshold = 0.1
-
-    # algorithm = open3d.pipelines.registration.TransformationEstimationPointToPoint()
+        mesh_frame = open3d.geometry.TriangleMesh.create_coordinate_frame(
+        size=0.2, origin=[0,0,0])
+        open3d.visualization.draw_geometries([cloud,mesh_frame])
+        open3d.visualization.draw_geometries([mesh_frame,gt,cloud])
     
-    cloud = open3d.t.geometry.PointCloud.from_legacy(cloud).cuda(0)
-    gt = open3d.t.geometry.PointCloud.from_legacy(gt).cuda(0)
+    # cloud = open3d.t.geometry.PointCloud.from_legacy(cloud).cuda(0)
+    # gt = open3d.t.geometry.PointCloud.from_legacy(gt).cuda(0)
 
-    # voxel_sizes = open3d.utility.DoubleVector([0.1, 0.05, 0.025])    
+    print("Apply point-to-plane ICP")
+    registration_ms_icp = open3d.pipelines.registration.registration_icp(
+        cloud, gt, 0.1, np.eye(4),
+        open3d.pipelines.registration.TransformationEstimationPointToPoint())
+    # print(reg_p2l)
+    # print("Transformation is:")
+    # print(reg_p2l.transformation)
+    # draw_registration_result(source, target, reg_p2l.transformation)
+
+    # voxel_sizes = open3d.utility.DoubleVector([0.05, 0.025, 0.0125])
+
+    # # List of Convergence-Criteria for Multi-Scale ICP:
     # criteria_list = [
-    # treg.ICPConvergenceCriteria(relative_fitness=0.0001,
-    #                             relative_rmse=0.0001,
-    #                             max_iteration=1000),
-    # treg.ICPConvergenceCriteria(0.00001, 0.00001, 15),
-    # treg.ICPConvergenceCriteria(0.000001, 0.000001, 10)
+    #     treg.ICPConvergenceCriteria(relative_fitness=0.0001,
+    #                                 relative_rmse=0.0001,
+    #                                 max_iteration=500),
+    #     treg.ICPConvergenceCriteria(0.00001, 0.00001, 15),
+    #     treg.ICPConvergenceCriteria(0.000001, 0.000001, 10)
     # ]
-    # max_correspondence_distances = open3d.utility.DoubleVector([0.1,0.1,0.1])
+
+    # # `max_correspondence_distances` for Multi-Scale ICP (open3d.utility.DoubleVector):
+    # max_correspondence_distances = open3d.utility.DoubleVector([0.05, 0.05, 0.05])
+
+    # # Initial alignment or source to target transform.
     # init_source_to_target = open3d.core.Tensor.eye(4, open3d.core.Dtype.Float32)
+
+    # # Select the `Estimation Method`, and `Robust Kernel` (for outlier-rejection).
     # estimation = treg.TransformationEstimationPointToPlane()
-    
+
     # # Save iteration wise `fitness`, `inlier_rmse`, etc. to analyse and tune result.
     # callback_after_iteration = lambda loss_log_map : print("Iteration Index: {}, Scale Index: {}, Scale Iteration Index: {}, Fitness: {}, Inlier RMSE: {},".format(
-    #     loss_log_map["iteration_index"].item(), 
-    #     loss_log_map["scale_index"].item(), 
-    #     loss_log_map["scale_iteration_index"].item(), 
-    #     loss_log_map["fitness"].item(), 
+    #     loss_log_map["iteration_index"].item(),
+    #     loss_log_map["scale_index"].item(),
+    #     loss_log_map["scale_iteration_index"].item(),
+    #     loss_log_map["fitness"].item(),
     #     loss_log_map["inlier_rmse"].item()))
-
-    # registration_ms_icp = treg.multi_scale_icp(source=cloud,target=gt,voxel_sizes=voxel_sizes,
-    #                                         criteria_list=criteria_list,
-    #                                         max_correspondence_distances=max_correspondence_distances,
-    #                                         init_source_to_target=init_source_to_target,
-    #                                         estimation=estimation)
-    voxel_sizes = open3d.utility.DoubleVector([0.1, 0.05, 0.025])
-
-    # List of Convergence-Criteria for Multi-Scale ICP:
-    criteria_list = [
-        treg.ICPConvergenceCriteria(relative_fitness=0.0001,
-                                    relative_rmse=0.0001,
-                                    max_iteration=20),
-        treg.ICPConvergenceCriteria(0.00001, 0.00001, 15),
-        treg.ICPConvergenceCriteria(0.000001, 0.000001, 10)
-    ]
-
-    # `max_correspondence_distances` for Multi-Scale ICP (open3d.utility.DoubleVector):
-    max_correspondence_distances = open3d.utility.DoubleVector([0.2, 0.2, 0.2])
-
-    # Initial alignment or source to target transform.
-    init_source_to_target = open3d.core.Tensor.eye(4, open3d.core.Dtype.Float32)
-
-    # Select the `Estimation Method`, and `Robust Kernel` (for outlier-rejection).
-    estimation = treg.TransformationEstimationPointToPlane()
-
-    # Save iteration wise `fitness`, `inlier_rmse`, etc. to analyse and tune result.
-    callback_after_iteration = lambda loss_log_map : print("Iteration Index: {}, Scale Index: {}, Scale Iteration Index: {}, Fitness: {}, Inlier RMSE: {},".format(
-        loss_log_map["iteration_index"].item(),
-        loss_log_map["scale_index"].item(),
-        loss_log_map["scale_iteration_index"].item(),
-        loss_log_map["fitness"].item(),
-        loss_log_map["inlier_rmse"].item()))
     
     
     
-    registration_ms_icp = treg.multi_scale_icp(cloud, gt, voxel_sizes,
-                                           criteria_list,
-                                           max_correspondence_distances,
-                                           init_source_to_target, estimation,
-                                           callback_after_iteration)
-
+    # registration_ms_icp = treg.multi_scale_icp(cloud, gt, voxel_sizes,
+    #                                        criteria_list,
+    #                                        max_correspondence_distances,
+    #                                        init_source_to_target, estimation,
+    #                                        callback_after_iteration)
+    print("Transformation is:", registration_ms_icp.transformation)
     print("Inlier Fitness: ", registration_ms_icp.fitness)
     print("Inlier RMSE: ", registration_ms_icp.inlier_rmse)
 
-    # draw_registration_result(cloud, gt, registration_ms_icp.transformation)
- 
-    # cloud = cloud.to_legacy()
-    # gt = gt.to_legacy()
-    draw_registration_result(cloud, gt,registration_ms_icp.transformation, paint=True)
+    if SHOW_RESULT:
+        draw_registration_result(cloud, gt,registration_ms_icp.transformation, paint=True)
 
-
-    # if SHOW_RESULT:
-    #     draw_registration_result(cloud.cpu(), gt.cpu(), reg_p2p.transformation, paint=True)
-
-    
-    # print("Apply point-to-plane ICP with robust kernel")
-    # sigma = 0.01
-    # loss = open3d.pipelines.registration.TukeyLoss(k=sigma)
-    # algorithm = open3d.pipelines.registration.TransformationEstimationPointToPlane(loss)
-    # reg_p2p = open3d.pipelines.registration.registration_icp(
-    #     cloud, gt, threshold, np.eye(4), algorithm,
-    #       open3d.pipelines.registration.ICPConvergenceCriteria(max_iteration=1000)
-    # )
-    
-    # draw_registration_result(cloud, gt, reg_p2p.transformation, paint=True)
-
-    with open("zed@50.txt", "a") as myfile:
+    with open(CAMERA+"_55.txt", "a") as myfile:
         # save relative fitness and inlier RMSE 
         myfile.write(str(registration_ms_icp.fitness) + " " + str(registration_ms_icp.inlier_rmse) + "\n")
 

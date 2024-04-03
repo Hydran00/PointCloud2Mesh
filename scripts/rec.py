@@ -21,7 +21,7 @@ DEVICE = torch.device("cuda:0")
 VISUALIZE_WITH_OPEN3D = True # use open3D or pycg
 LOAD_CAMERA_VIEW = False  # if using open3D, load camera view set point from json, if false then the position is overwritten
 CAMERA_FILE_NAME = 'zed.json' # file with configuration
-UPDATE_VIEWER = True#LOAD_CAMERA_VIEW # load just the first reconstruction for a visual inspection
+UPDATE_VIEWER = LOAD_CAMERA_VIEW # load just the first reconstruction for a visual inspection
 
 
 class PCDListener(Node):
@@ -80,7 +80,6 @@ class PCDListener(Node):
     
 
     def listener_callback(self, msg):
-        print("Received point cloud")
         # do not convert msg if the previous is not already processed
         if self.rendered_last:
             # Convert ROS PointCloud2 message to numpy arrays)
@@ -90,14 +89,15 @@ class PCDListener(Node):
             # orient normals towards the camera
             converted_cloud.orient_normals_towards_camera_location(camera_location=np.array([0., 0., 0.]))
             # draw geom
-            open3d.visualization.draw_geometries([converted_cloud.to_legacy()])
             self.cloud = converted_cloud
             self.rendered_last = False
             self.cloud_received = True
-            # save ply
-            print("Saving point cloud")
-            open3d.t.io.write_point_cloud("cloud.ply", converted_cloud)
-            time.sleep(5.0)
+            # self.create_mesh(converted_cloud)
+            rec_utils.evaluate_sensor(self.cloud)
+            # # save ply
+            # print("Saving point cloud")
+            # open3d.t.io.write_point_cloud("cloud.ply", converted_cloud)
+            # time.sleep(5.0)
 
     def create_mesh(self, cloud):
         cloud = cloud.cuda(0)
@@ -123,7 +123,6 @@ class PCDListener(Node):
             # self.vis.add_geometry(cloud)
             if not UPDATE_VIEWER:
                 self.vis.run()
-                # rec_utils.evaluate_sensor(cloud)
             if self.load_camera_view and UPDATE_VIEWER:
                 # load camera config
                 self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)

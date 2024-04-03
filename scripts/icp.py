@@ -182,7 +182,7 @@ def main(args=None):
     # draw_registration_result(source, target, reg_p2p.transformation)
 
     # read txt file that contains two values with numpy
-    with open('realsense_50.txt', 'r') as data:
+    with open('ZED_55.txt', 'r') as data:
             x = []
             y = []
             for line in data:

@@ -174,3 +174,61 @@ Metrics for ICP:
 
 
 
+# Trying with a box instead of Coke can
+This sould solve the problem of the specular reflection on the can.
+
+## Qualitive analysis
+<table>
+    <th colspan="4">
+        Initial guess with RS @ 55cm against the measured box (manually overlapped)
+    </th>
+    <tr>
+        <td><img src="assets/can_rec/box_1_rs.png" width="400"></td>
+        <td><img src="assets/can_rec/box_2_rs.png" width="400"></td>
+        <td><img src="assets/can_rec/box_3_rs.png" width="400"></td>   
+        <td><img src="assets/can_rec/box_4_rs.png" width="400"></td>
+    </tr>
+</table>
+<table>
+    <th colspan="4">
+        Initial guess with Zed @ 55cm against the measured box (manually overlapped)
+    </th>
+    <tr>
+        <td><img src="assets/can_rec/box_1_zed.png" width="400"></td>
+        <td><img src="assets/can_rec/box_2_zed.png" width="400"></td>
+        <td><img src="assets/can_rec/box_3_zed.png" width="400"></td>   
+        <td><img src="assets/can_rec/box_4_zed.png" width="400"></td>
+    </tr>
+</table>
+
+
+### ICP results ...
+<img src="assets/can_rec/box_icp_rs.png" width="400">
+
+### Metrics
+<table>
+    <th colspan="4">
+        ICP Result with Point-to-Plane for RS415 @ 55cm  (500 measurements)
+    </th>
+    <tr>
+        <td>Mean inlier RMSE </td>
+        <td>Var inlier RMSE </td>
+    </tr>
+    <tr>
+        <td>0.00248</td>
+        <td>3.46475e-08</td>
+    </tr>
+</table>
+<table>
+    <th colspan="4">
+        ICP Result with Point-to-Plane for Zed @ 55cm  (300 measurements)
+    </th>
+    <tr>
+        <td>Mean inlier RMSE </td>
+        <td>Var inlier RMSE </td>
+    </tr>
+        <td>0.00624</td>
+        <td>4.73667e-06</td>
+    <tr>
+    </tr>
+</table>
