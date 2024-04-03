@@ -202,7 +202,7 @@ This sould solve the problem of the specular reflection on the can.
 </table>
 
 
-### ICP results ...
+### ICP results (RS415)
 <img src="assets/can_rec/box_icp_rs.png" width="400">
 
 ### Metrics
@@ -227,8 +227,8 @@ This sould solve the problem of the specular reflection on the can.
         <td>Mean inlier RMSE </td>
         <td>Var inlier RMSE </td>
     </tr>
+    <tr>
         <td>0.00624</td>
         <td>4.73667e-06</td>
-    <tr>
     </tr>
 </table>
