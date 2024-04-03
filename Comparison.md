@@ -129,27 +129,41 @@ Metrics for ICP:
 `fitness`: measures the overlapping area (# of inlier correspondences / # of points in target). The higher the better.  
 `inlier_rmse`: measures the RMSE of all inlier correspondences. The lower the better.  
 
-ICP Result with Point-to-Plane for RS415 @ 50cm </td>
 <table>
     <tr>
+        <th colspan="4">
+            ICP Result with Point-to-Plane for RS415 @ 50cm  (40 measurements)
+        </th>
+    </tr>
+    <tr>
         <td>Mean relative fitness </td>
+        <td>Var relative fitness </td>
         <td>Mean inlier RMSE </td>
+        <td>Var inlier RMSE </td>
     </tr>
     <tr>
         <td>1.0 (?)</td>
+        <td>0.0 (?)</td>
         <td>0.01012</td>
+        <td>3.63141e-09</td>
     </tr>
 </table>
 
-ICP Result with Point-to-Plane for Zed2 @ 50cm </td>
 <table>
+    <th colspan="4">
+        ICP Result with Point-to-Plane for Zed2 @ 50cm  (40 measurements)
+    </th>
     <tr>
         <td>Mean relative fitness </td>
+        <td>Var relative fitness </td>
         <td>Mean inlier RMSE </td>
+        <td>Var inlier RMSE </td>
     </tr>
     <tr>
         <td>1.0 (?)</td>
+        <td>0.0 (?)</td>
         <td>0.00740</td>
+        <td>1.08862e-05</td>
     </tr>
 </table>
 

@@ -21,7 +21,7 @@ def get_pc_from_mesh():
     # o3d.visualization.draw({'name': 'box', 'geometry': mesh, 'material': material})
 
     # extract every point on the surface of the mesh
-    pcd = mesh.sample_points_uniformly(number_of_points=40000)
+    pcd = mesh.sample_points_uniformly(number_of_points=100000)
     # visualize the point cloud
     o3d.visualization.draw_geometries([pcd])
     # save the point cloud

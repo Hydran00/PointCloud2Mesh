@@ -21,7 +21,7 @@ DEVICE = torch.device("cuda:0")
 VISUALIZE_WITH_OPEN3D = True # use open3D or pycg
 LOAD_CAMERA_VIEW = False  # if using open3D, load camera view set point from json, if false then the position is overwritten
 CAMERA_FILE_NAME = 'zed.json' # file with configuration
-UPDATE_VIEWER = LOAD_CAMERA_VIEW # load just the first reconstruction for a visual inspection
+UPDATE_VIEWER = True#LOAD_CAMERA_VIEW # load just the first reconstruction for a visual inspection
 
 
 class PCDListener(Node):
@@ -35,17 +35,17 @@ class PCDListener(Node):
         self.xyz = None
         self.normal = None
         self.color = None
-        self.mesh = open3d.geometry.TriangleMesh()
+        self.mesh = open3d.t.geometry.TriangleMesh()
         self.cloud = None
         # visualizer
         self.vis = open3d.visualization.Visualizer()
         self.vis.create_window(width=1280, height=720)
         self.view_control = self.vis.get_view_control()
-        self.vis.add_geometry(self.mesh)
+        self.vis.add_geometry(self.mesh.to_legacy())
         self.load_camera_view = LOAD_CAMERA_VIEW
         self.param = None
         if self.load_camera_view:
-            self.param = open3d.io.read_pinhole_camera_parameters(CAMERA_FILE_NAME)
+            self.param = open3d.t.io.read_pinhole_camera_parameters(CAMERA_FILE_NAME)
             self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)
         # flags
         self.rendered_last = True
@@ -63,7 +63,7 @@ class PCDListener(Node):
 
         if self.cloud_received:
             self.cloud_received = False
-            self.create_mesh(self.cloud)
+            # self.create_mesh(self.cloud)
             self.rendered_last = True
 
 
@@ -76,27 +76,35 @@ class PCDListener(Node):
                 os.remove(CAMERA_FILE_NAME)
             param = self.vis.get_view_control().convert_to_pinhole_camera_parameters()
             open3d.io.write_pinhole_camera_parameters(CAMERA_FILE_NAME, param)
-            print("Open3D Camera parameters saved")
+            # print("Open3D Camera parameters saved")
     
 
     def listener_callback(self, msg):
+        print("Received point cloud")
         # do not convert msg if the previous is not already processed
         if self.rendered_last:
             # Convert ROS PointCloud2 message to numpy arrays)
             converted_cloud = rec_utils.convertCloudFromRosToOpen3d(msg)
             # estimate normals
-            converted_cloud.estimate_normals(search_param=open3d.geometry.KDTreeSearchParamHybrid(radius=1, max_nn=40))
+            converted_cloud.estimate_normals(radius=1, max_nn=40)
             # orient normals towards the camera
             converted_cloud.orient_normals_towards_camera_location(camera_location=np.array([0., 0., 0.]))
+            # draw geom
+            open3d.visualization.draw_geometries([converted_cloud.to_legacy()])
             self.cloud = converted_cloud
             self.rendered_last = False
             self.cloud_received = True
+            # save ply
+            print("Saving point cloud")
+            open3d.t.io.write_point_cloud("cloud.ply", converted_cloud)
+            time.sleep(5.0)
 
     def create_mesh(self, cloud):
-        
-        input_xyz = torch.from_numpy(np.asarray(cloud.points)).float().to(DEVICE)
-        input_normal = torch.from_numpy(np.asarray(cloud.normals)).float().to(DEVICE)
-        input_color = torch.from_numpy(np.asarray(cloud.colors)).float().to(DEVICE)
+        cloud = cloud.cuda(0)
+        input_xyz = torch.utils.dlpack.from_dlpack(cloud.point.positions.to_dlpack())
+        input_normal = torch.utils.dlpack.from_dlpack(cloud.point.normals.to_dlpack())
+        input_color = torch.utils.dlpack.from_dlpack(cloud.point.colors.to_dlpack())
+
         nksr = Reconstructor(DEVICE)
         field = nksr.reconstruct(input_xyz, input_normal, detail_level=1.0)
         field.set_texture_field(fields.PCNNField(input_xyz, input_color))
@@ -105,17 +113,17 @@ class PCDListener(Node):
         if VISUALIZE_WITH_OPEN3D:
             # open3d visualizer
             vertices_np = new_mesh.v.cpu().detach().numpy()
-            self.mesh.vertices = open3d.utility.Vector3dVector(vertices_np)
+            self.mesh.vertex.positions = open3d.core.Tensor(vertices_np, dtype=open3d.core.Dtype.Float32)
             faces_np = new_mesh.f.cpu().detach().numpy()
-            self.mesh.triangles = open3d.utility.Vector3iVector(faces_np)
+            self.mesh.triangle.indices = open3d.core.Tensor(faces_np, dtype=open3d.core.Dtype.Int32)
             colors_np = new_mesh.c.cpu().detach().numpy()
-            self.mesh.vertex_colors = open3d.utility.Vector3dVector(colors_np)
+            self.mesh.vertex.colors = open3d.core.Tensor(colors_np, dtype=open3d.core.Dtype.Float32)
             # self.vis.add_geometry(self.mesh)
             # add point cloud
             # self.vis.add_geometry(cloud)
             if not UPDATE_VIEWER:
-                # self.vis.run()
-                rec_utils.evaluate_sensor(cloud)
+                self.vis.run()
+                # rec_utils.evaluate_sensor(cloud)
             if self.load_camera_view and UPDATE_VIEWER:
                 # load camera config
                 self.view_control.convert_from_pinhole_camera_parameters(self.param, allow_arbitrary=True)

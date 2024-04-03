@@ -182,18 +182,19 @@ def main(args=None):
     # draw_registration_result(source, target, reg_p2p.transformation)
 
     # read txt file that contains two values with numpy
-    with open('zed_50.txt', 'r') as data:
+    with open('realsense_50.txt', 'r') as data:
             x = []
             y = []
             for line in data:
                 p = line.split()
                 x.append(float(p[0]))
                 y.append(float(p[1]))
-    print(x)
-    print(y)
+    # print(x)
+    # print(y)
     print("Mean relative fitness: ",np.mean(x))
+    print("Var relative fitness: ",np.var(x))
     print("Mean inlier RMSE: ",np.mean(y))
-
+    print("Var inlier RMSE: ",np.var(y))
 
 if __name__ == '__main__':
     main()
