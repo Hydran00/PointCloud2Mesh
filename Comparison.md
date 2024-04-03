@@ -176,7 +176,8 @@ Metrics for ICP:
 
 # Trying with a box instead of Coke can
 This sould solve the problem of the specular reflection on the can.
-
+## Ground truth
+<img src="assets/can_rec/gt_box.jpg" width="400">
 ## Qualitive analysis
 <table>
     <th colspan="4">

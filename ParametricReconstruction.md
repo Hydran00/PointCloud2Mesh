@@ -70,6 +70,34 @@ I tried this metric as a loss function and I optimised it with respect to the pa
     </tr>
 </table>
 
+
+---
+#### Testing on myself
+<table>
+    <tr>
+        <td>Initial conditions</td>
+        <td>100 iterations</td>
+        <td>500 iterations (convergence)</td>
+    </tr>
+    <tr>
+    </tr>
+        <td><img src="assets/human_rec/result_me3_1.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me3_2.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me3_3.png" width="500"></td>
+    <tr>
+        <td><img src="assets/human_rec/result_me4_1.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me4_2.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me4_3.png" width="500"></td>
+    </tr>
+    <tr>
+        <td><img src="assets/human_rec/result_me5_1.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me5_2.png" width="500"></td>
+        <td><img src="assets/human_rec/result_me5_3.png" width="500"></td>
+    </tr>
+</table>
+
+
+
 **PRO:**   
     - Estremely good result with respect to RGB-based reconstruction  since we can exploit pointclouds  
 **CONS:**  
@@ -78,9 +106,8 @@ I tried this metric as a loss function and I optimised it with respect to the pa
   
 <img src="assets/human_rec/chamfer_problem.png" width="400">
 
----
-#### Testing on myself
-<table>
+
+<!-- <table>
     <tr>
         <td>Initial conditions</td>
         <td>Result after 600 iterations</td>
@@ -99,7 +126,7 @@ I tried this metric as a loss function and I optimised it with respect to the pa
         <td><img src="assets/human_rec/start_me2.png" width="400"></td>
         <td><img src="assets/human_rec/result_me2.png" width="400"></td>
     </tr>
-</table>
+</table> -->
 
 <img src="assets/human_rec/best_me.png" width="400">
 
@@ -108,3 +135,6 @@ I tried this metric as a loss function and I optimised it with respect to the pa
 ### Question 2: What do we really need? Real time capabilities vs Final Quality
 
 My idea: Use filtered point cloud for the visualization since it runs 30FPS and the parametrised model for robot controller and maybe stiffness visualization with heatmaps.
+
+
+![alt text](image.png)
