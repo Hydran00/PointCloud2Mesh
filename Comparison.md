@@ -4,8 +4,8 @@ We would like to understand what is the best sensor between the `zed` and the `r
 - Datasheet:
     <table>
         <tr>
-            <td><img src="assets/rs_ds.png" width="600"></td>
-            <td><img src="assets/zed_ds.png" width="300"></td>
+            <td><img src="assets/can_rec/rs_ds.png" width="600"></td>
+            <td><img src="assets/can_rec/zed_ds.png" width="300"></td>
         </tr>
         <tr>
             <td>rs415 Datasheet</td>
@@ -15,16 +15,16 @@ We would like to understand what is the best sensor between the `zed` and the `r
 - Visual inspection:
     <table>
         <tr>
-            <td><img src="assets/rs_40cm.png" width="300"></td>
-            <td><img src="assets/zed_40cm.png" width="300"></td>
+            <td><img src="assets/can_rec/rs_40cm.png" width="300"></td>
+            <td><img src="assets/can_rec/zed_40cm.png" width="300"></td>
         </tr>
         <tr>
             <td>rs415 @ 40cm</td>
             <td>zed2  @ 40cm</td>
         </tr>
         <tr>
-            <td><img src="assets/rs_80cm.png" width="300"></td>
-            <td><img src="assets/zed_80cm.png" width="300"></td>
+            <td><img src="assets/can_rec/rs_80cm.png" width="300"></td>
+            <td><img src="assets/can_rec/zed_80cm.png" width="300"></td>
         </tr>
         <tr>
             <td>rs415 @ 80cm</td>
@@ -42,8 +42,8 @@ We would like to understand what is the best sensor between the `zed` and the `r
 ### 1. Extract colored point cloud from 3D model using uniform sampling function
 <table>
     <tr>
-        <td><img src="assets/gt_mesh.png" width="300"></td>
-        <td><img src="assets/gt_pc.png" width="300"></td>
+        <td><img src="assets/can_rec/gt_mesh.png" width="300"></td>
+        <td><img src="assets/can_rec/gt_pc.png" width="300"></td>
     </tr>
     <tr>
         <td>Verità-Terra Mesh</td>
@@ -57,7 +57,7 @@ We would like to understand what is the best sensor between the `zed` and the `r
 ### 2. Collect multiple measurements of a Coke can from different distances and orientation with the two sensors.
 <table>
     <tr>
-        <td><img src="assets/setup.jpeg" width="500"></td>
+        <td><img src="assets/can_rec/setup.jpeg" width="500"></td>
     </tr>
     <tr>
         <td>Setup (non posso fare di meglio finche non arriva la prolunga USB 😖)</td>
@@ -65,8 +65,8 @@ We would like to understand what is the best sensor between the `zed` and the `r
 </table>
 <table>
     <tr>
-        <td><img src="assets/rs_pc_40cm.png" width="300"></td>
-        <td><img src="assets/rs_pc_50cm.png" width="300"></td>
+        <td><img src="assets/can_rec/rs_pc_40cm.png" width="300"></td>
+        <td><img src="assets/can_rec/rs_pc_50cm.png" width="300"></td>
     </tr>
     <tr>
         <td>RS435 @ 40cm</td>
@@ -77,7 +77,7 @@ We would like to understand what is the best sensor between the `zed` and the `r
 ### 3. Crop the point cloud in order to isolate the can.
 <table>
     <tr>
-        <td><img src="assets/rs_pc_crop_50cm.png" width="600"></td>
+        <td><img src="assets/can_rec/rs_pc_crop_50cm.png" width="600"></td>
     </tr>
     <tr>
         <td>RS435 @ 50cm Raw vs Cropped</td>
@@ -89,17 +89,17 @@ We would like to understand what is the best sensor between the `zed` and the `r
 ### 4. Apply `ICP` between the point cloud extracted from the CAD of the same object and the measured one to align points.
 <table>
     <tr>
-        <td><img src="assets/eq_icp_ptpoint.png" width="600"></td>
+        <td><img src="assets/can_rec/eq_icp_ptpoint.png" width="600"></td>
     </tr>
     <tr>
-        <td><img src="assets/eq_icp_ptplane.png" width="600"></td>
+        <td><img src="assets/can_rec/eq_icp_ptplane.png" width="600"></td>
     </tr>
 </table>
 First result for RS415:
 <table>
     <tr>
-        <td><img src="assets/rs_icp_50cm.png" width="400"></td>
-        <td><img src="assets/zed_icp_50cm.png" width="400"></td>
+        <td><img src="assets/can_rec/rs_icp_50cm.png" width="400"></td>
+        <td><img src="assets/can_rec/zed_icp_50cm.png" width="400"></td>
     </tr>
     <tr>
         <td>ICP Result with Point-to-Plane for RS435 @ 50cm </td>
@@ -111,15 +111,16 @@ Zed result after adding lighting:
 
 <table>
     <tr>
-        <td><img src="assets/zed_best_front.png" width="400"></td>
-        <td><img src="assets/zed_best_left.png" width="400"></td>
-        <td><img src="assets/zed_best_right.png" width="400"></td>
-        <td><img src="assets/zed_best_top.png" width="400"></td>
+        <td><img src="assets/can_rec/zed_best_front.png" width="400"></td>
+        <td><img src="assets/can_rec/zed_best_left.png" width="400"></td>
+        <td><img src="assets/can_rec/zed_best_right.png" width="400"></td>
+        <td><img src="assets/can_rec/zed_best_top.png" width="400"></td>
     </tr>
     <tr>
         <td>Front</td>
         <td>Left</td>
         <td>Right</td>
+        <td>Top</td>
     </tr>
 </table>
 
@@ -166,5 +167,10 @@ Metrics for ICP:
         <td>1.08862e-05</td>
     </tr>
 </table>
+
+### Interesting reference
+[Mean Map Entropy (MME)](https://map-metrics.readthedocs.io/en/latest/usage.html)  
+[Point Cloud Evaluation](https://github.com/JokerJohn/Cloud_Map_Evaluation)  
+
 
 
