@@ -66,7 +66,7 @@ I tried this metric as a loss function and I optimised it with respect to the pa
         <td><img src="assets/human_rec/opt3.png" width="400"></td>
     </tr>
     <tr>
-    <td colspan="2"><img src="assets/human_rec/opt3.png" width="800"></td>
+    <td colspan="2"><img src="assets/human_rec/opt4.png" width="800"></td>
     </tr>
 </table>
 
