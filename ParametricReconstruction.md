@@ -55,7 +55,33 @@ Minimise a metrics online in an iterative way (like ICP).
 
 <img src="assets/human_rec/chamfer.png" width="300">
 
-I tried this metric as a loss function and I optimised it with respect to the parameters of the SMPL model. (not me, a guy on GitHub)
+
+#### Loss used
+Directional Chamfer Distance:
+```
+Directional Chamfer Distance from bm template to vertices
+Sum the distances from every point of the template to the closest point
+of the scan
+
+:param scan_vertices: (torch.tensor) of N x 3 dim
+:param template_vertices: (torch.tensor) of M x 3 dim
+return: (float) sum of distances from every point of the 
+                template to the closest point of the scan
+```
+
+**Optional**
+LandmarkLoss:
+```
+summed L2 norm between scan_landmarks and template_landmarks
+
+:param scan_landmarks: (torch.tensor) dim (N,3)
+:param template_landmarks: (torch.tensor) dim (N,3)
+
+return: (float) summed L2 norm between scan_landmarks and 
+                template_landmarks
+```
+
+
 <table>
     <tr>
         <td><img src="assets/human_rec/opt0.png" width="400"></td>
@@ -72,18 +98,13 @@ I tried this metric as a loss function and I optimised it with respect to the pa
 
 
 ---
-#### Testing on myself
+#### Testing on myself: Failures
 <table>
     <tr>
         <td>Initial conditions</td>
         <td>100 iterations</td>
         <td>500 iterations (convergence)</td>
     </tr>
-    <tr>
-    </tr>
-        <td><img src="assets/human_rec/result_me3_1.png" width="500"></td>
-        <td><img src="assets/human_rec/result_me3_2.png" width="500"></td>
-        <td><img src="assets/human_rec/result_me3_3.png" width="500"></td>
     <tr>
         <td><img src="assets/human_rec/result_me4_1.png" width="500"></td>
         <td><img src="assets/human_rec/result_me4_2.png" width="500"></td>
@@ -96,10 +117,28 @@ I tried this metric as a loss function and I optimised it with respect to the pa
     </tr>
 </table>
 
-
+#### Testing on myself: Success
+<table>
+    <tr>
+        <td>Initial conditions</td>
+        <td colspan="3">500 iterations (convergence)</td>
+    </tr>
+    <tr>
+        <td><img src="assets/human_rec/result_me3_1.png" width="300"></td>
+        <td><img src="assets/human_rec/result_me3_2.png" height="300"></td>
+        <td><img src="assets/human_rec/result_me3_3.png" width="400"></td>
+        <td><img src="assets/human_rec/result_me3_4.png" width="400"></td>
+    </tr>
+    <tr>
+        <td><img src="assets/human_rec/result_me6_1.png" width="300"></td>
+        <td><img src="assets/human_rec/result_me6_2.png" height="300"></td>
+        <td><img src="assets/human_rec/result_me6_3.png" width="400"></td>
+        <td><img src="assets/human_rec/result_me6_4.png" width="400"></td>
+    </tr>
+</table>
 
 **PRO:**   
-    - Estremely good result with respect to RGB-based reconstruction  since we can exploit pointclouds  
+    - Estremely good result (when arms are fitted) with respect to RGB-based reconstruction  since we can exploit pointclouds  
 **CONS:**  
     - Very slow (30 iteration/second -> 1 FPS accepting 30 iterations)  
     - The metric used in the implementation found is known to be affect by the following issue
@@ -128,13 +167,16 @@ I tried this metric as a loss function and I optimised it with respect to the pa
     </tr>
 </table> -->
 
-<img src="assets/human_rec/best_me.png" width="400">
-
-![alt text](image.png)
+<!-- <img src="assets/human_rec/best_me.png" width="400"> -->
 
 ### Question 2: What do we really need? Real time capabilities vs Final Quality
 
 My idea: Use filtered point cloud for the visualization since it runs 30FPS and the parametrised model for robot controller and maybe stiffness visualization with heatmaps.
 
 
-![alt text](image.png)
+# References
+- [SMPL](https://smpl.is.tue.mpg.de/)
+- [MANO](https://mano.is.tue.mpg.de/)
+- [FLAME](https://flame.is.tue.mpg.de/)
+- [SMPL-X](https://smpl-x.is.tue.mpg.de/)
+- [SMPL-Fitting](https://github.com/DavidBoja/SMPL-Fitting/)

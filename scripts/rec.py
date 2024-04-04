@@ -99,7 +99,7 @@ class PCDListener(Node):
             # # save ply
             # draw geom
             print("Saving point cloud")
-            open3d.t.io.write_point_cloud("clown_cloud6.ply", converted_cloud)
+            open3d.t.io.write_point_cloud("clown_cloud8.ply", converted_cloud)
             open3d.visualization.draw_geometries([converted_cloud.to_legacy()])
             time.sleep(5.0)
 

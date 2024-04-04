@@ -242,18 +242,18 @@ def crop_cloud(cloud):
     x_min = -0.8
     x_max = 0.8
     
-    y_min = -0.85
+    y_min = -0.77
     y_max = 1.0
     
-    z_min = -0.07
-    z_max = 0.39
+    z_min = -0.09
+    z_max = 0.50
 
     bbox = open3d.geometry.AxisAlignedBoundingBox(min_bound=(x_min, y_min, z_min), max_bound=(x_max, y_max, z_max))
     cloud = cloud.crop(bbox)
     return cloud
 
 if __name__ == "__main__":
-    cloud = open3d.io.read_point_cloud("clown_cloud5.ply")
+    cloud = open3d.io.read_point_cloud("clown_cloud6.ply")
     mesh_frame = open3d.geometry.TriangleMesh.create_coordinate_frame(
     size=0.2, origin=[0,0,0])
     # open3d.visualization.draw_geometries([cloud,mesh_frame])
@@ -298,5 +298,9 @@ if __name__ == "__main__":
     open3d.visualization.draw_geometries([cloud,mesh_frame])
     # save
     cloud, ind = cloud.remove_statistical_outlier(nb_neighbors=1000, std_ratio=2.0)
+    open3d.visualization.draw_geometries([cloud,mesh_frame])
+    # downsample
+    cloud = cloud.voxel_down_sample(voxel_size=0.02)
     open3d.visualization.draw_geometries([cloud])
-    open3d.io.write_point_cloud("crop_clown_cloud5.ply", cloud)
+
+    open3d.io.write_point_cloud("crop_clown_cloud6_downsampled.ply", cloud)
